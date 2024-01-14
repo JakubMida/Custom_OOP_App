@@ -12,7 +12,22 @@ class Tile:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+def init_game():
+    global snake, food, velocityX, velocityY, snake_body, game_over, score
+    snake = Tile(random.randint(0, COLS-1) * TILE_SIZE, random.randint(0, ROWS-1) * TILE_SIZE) 
+    food = Tile(random.randint(0, COLS-1) * TILE_SIZE, random.randint(0, ROWS-1) * TILE_SIZE)
+    snake_body = []
+    velocityX = 0
+    velocityY = 0
+    game_over = False
+    score = 0
 
+
+def reset_game():
+    init_game()
+    
+def quit_game():
+    window.destroy()
 #game window
 window = tkinter.Tk()
 window.title("Snake")
@@ -22,6 +37,7 @@ canvas.pack()
 window.update()
 
 #centering the window
+
 window_width = window.winfo_width()
 window_height = window.winfo_height()
 screen_width = window.winfo_screenwidth()
@@ -33,8 +49,8 @@ window_y = int((screen_height/2)-(screen_height/2))
 window.geometry(f"{window_width}x{window_height}+{window_x}+{window_y}")
 
 #initializing the game
-snake = Tile(5*TILE_SIZE,5*TILE_SIZE) #single tile, head
-food = Tile(10*TILE_SIZE, 10*TILE_SIZE)
+snake = Tile(random.randint(0, COLS-1) * TILE_SIZE, random.randint(0, ROWS-1) * TILE_SIZE) 
+food = Tile(random.randint(0, COLS-1) * TILE_SIZE, random.randint(0, ROWS-1) * TILE_SIZE)
 snake_body = []
 velocityX = 0
 velocityY = 0
@@ -42,25 +58,32 @@ game_over = False
 score = 0
 
 def change_direction(e): #e-event
-    #print(e)
-    #print(e.keysym)
+    
     global velocityX, velocityY, game_over
     if (game_over):
         return
     
-    if(e.keysym == "Up" and velocityY != 1):
+    if e.keysym == "Up" and velocityY != 1:
         velocityX = 0
         velocityY = -1
-    elif (e.keysym == "Down" and velocityY != -1):
+    elif e.keysym == "Down" and velocityY != -1:
         velocityX = 0
         velocityY = 1
-    elif(e.keysym == "Left" and velocityX != 1):
+    elif e.keysym == "Left" and velocityX != 1:
         velocityX = -1
         velocityY = 0
-    elif(e.keysym == "Right" and velocityX != -1):
+    elif e.keysym == "Right" and velocityX != -1:
         velocityX = 1
         velocityY = 0
-        
+    elif e.keysym == "r":
+        reset_game()
+    elif e.keysym == "q":
+        quit_game()
+
+window.bind("<KeyRelease-r>", lambda event: reset_game())
+window.bind("<KeyRelease-q>", lambda event: quit_game())
+       
+            
 def move():
     global snake, food, snake_body, game_over, score
     if(game_over):
@@ -114,12 +137,14 @@ def draw():
 
     if (game_over):
         canvas.create_text(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, font = "Arial 20", text= f"Game over!: {score}", fill = "white")
+        canvas.create_text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 30, font="Arial 12", text="Press 'R' to Restart", fill="white")
+        canvas.create_text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 60, font="Arial 12", text="Press 'Q' to Quit", fill="white")
     else:
         canvas.create_text(30,20, font = "Arial 10", text = f"Score: {score}", fill = "white")                
     
-    window.after(150, draw)  
+    window.after(150, draw)  #speed, 150ms = 0.15s
 draw()
 
 window.bind("<KeyRelease>", change_direction)
-
+init_game()
 window.mainloop()
